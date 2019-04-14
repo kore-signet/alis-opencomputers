@@ -4,6 +4,7 @@ local thread = require("thread")
 local component = require("component")
 local event = require("event")
 local shell = require("shell")
+local s = require("serialization")
 
 local browser = {}
 
