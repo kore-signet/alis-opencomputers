@@ -1,0 +1,26 @@
+NAME
+  kitten - the OC web browser
+
+SYNOPSIS
+  kitten setdns DNSADDRESS
+  kitten file OCMLFILE
+  kitten [OPTION]... ADDRESS FILE
+
+DESCRIPTION
+  `kitten` is a web browser for OpenComputers, with a DOM tree and support for lua scripting.
+
+  --dns=ADDRESS
+    uses a custom DNS server address for domain lookup.
+
+EXAMPLES
+  kitten setdns c9de8bb3-9205-4fd2-ac7c-c96bdedbd5ec
+    Sets the default DNS address to `c9de8bb3-9205-4fd2-ac7c-c96bdedbd5ec`
+
+  kitten file index.ocml
+    Opens file `index.ocml`
+
+  kitten example.com important.ocml
+    Requests and opens file `important.ocml` from `example.com`
+
+    kitten --dns=c9de8bb3-9205-4fd2-ac7c-c96bdedbd5ec example.com important.ocml
+      Requests and opens file `important.ocml` from `example.com`, using DNS server `c9de8bb3-9205-4fd2-ac7c-c96bdedbd5ec` for domain lookup.

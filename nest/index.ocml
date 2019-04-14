@@ -1,0 +1,12 @@
+<p fg="0x0000FF" bg="0x000000">Nest, the OpenComputers web server.</p>
+<p fg="0x00FF00" bg="0x000000"> Current uptime of this computer: </p>
+<script>
+  local script = {}
+  local computer = require("computer")
+  
+  function script:run(browser)
+    browser.dom:children()[2]:setValue("Current uptime of this computer: " .. computer.uptime())
+  end
+
+  return script
+</script>

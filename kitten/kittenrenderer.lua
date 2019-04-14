@@ -41,7 +41,7 @@ function renderer:main_loop(browser)
 
     gpu.setBackground(0x000000)
     term.clear()
-    
+
     for _, v in ipairs(browser.dom:children()) do
       self:render(v)
     end

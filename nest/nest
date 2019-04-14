@@ -1,0 +1,13 @@
+NAME
+  nest - An OC pretend web server
+
+SYNOPSIS
+  nest
+
+DESCRIPTION
+  `pathfinder` is a pretend web server for OpenComputers.
+  Files to be hosted are stored in `/usr/web`
+
+EXAMPLES
+  nest
+    Runs the server.

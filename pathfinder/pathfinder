@@ -1,0 +1,23 @@
+NAME
+  pathfinder - An OC pretend DNS server
+
+SYNOPSIS
+  pathfinder update --DOMAIN=ADDRESS
+  pathfinder delete DOMAIN
+  pathfinder
+
+DESCRIPTION
+  `pathfinder` is a pretend DNS server for OpenComputers.
+
+  --domain=address
+    Sets `domain` to `address` in the paths table.
+
+EXAMPLES
+  pathfinder update --example.com=c9de8bb3-9205-4fd2-ac7c-c96bdedbd5ec
+    Sets `example.com` to `c9de8bb3-9205-4fd2-ac7c-c96bdedbd5ec`
+
+  pathfinder delete `example.com`
+    Remove domain `example.com`
+
+  pathfinder
+    Runs the pretend dns server.

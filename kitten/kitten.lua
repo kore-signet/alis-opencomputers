@@ -1,23 +1,16 @@
 local xml = require("xmlSimple")
-local renderer = require("renderer")
+local renderer = require("kittenrenderer")
 local thread = require("thread")
 local component = require("component")
 local event = require("event")
-
-function network_filter(name,a,b,c, ...)
-  if c == 80 then
-    return true
-  else
-    return false
-  end
-end
+local shell = require("shell")
 
 local browser = {}
 
 function browser:parse_dom(page)
   self.dom = xml.newParser()
   self.dom = self.dom:ParseXmlText(page)
-  
+
   self.scripts = {}
   local counter = 0
   for _, v in ipairs(self.dom:children()) do
@@ -34,42 +27,69 @@ function browser:parse_dom(page)
 end
 
 function browser:spawn_renderer()
-  thread.create(renderer.main_loop(renderer,self))
+  return thread.create(renderer.main_loop(renderer,self))
 end
 
 function browser:dns_get(addr)
-  local m = component.modem
   m.send(self.dns,53,addr)
-  
-  local _, _, _, _, r = event.pull("modem_message")
+
+  local _, _, _, _, _, r = event.pull("modem_message",nil,self.dns,53)
   return r
 end
 
 function browser:network_get(addr,file)
-  local m = component.modem
-  
-  m.send(dns_get(addr),80,file)
-  
+  local trueaddr = self:dns_get(addr)
+  self.m.send(trueaddr,80,file)
+
   local complete = false
   local page = ""
   while not complete do
-    local _, _, _, _, chunk, last = event.pullFiltered(network_filter)
-    page = page .. chunk
+    local _, _, _, _, _, chunk, last = event.pull("modem_message",nil,trueaddr,80)
+    if chunk ~= nil then
+      page = page .. chunk
+    end
     complete = last
   end
   self:parse_dom(page)
 end
 
-function browser:init(dns)
-  self.dns = dns
+function browser:file_get(file)
+  local f = io.open(file,"r")
+  self:parse_dom(f:read("*all"))
+  f:close()
 end
 
-local f = io.open("test.ocml","r")
-local content = f:read("*all")
-f:close()
+function browser:init(dns)
+  if dns == nil then
+    local kitten_f = io.open("/home/.kitten.conf","r")
+    local kitten_conf = s.unserialize(kitten_f:read("*all"))
+    kitten_f:close()
+    self.dns = kitten_conf["dns"]
+  else
+    self.dns = dns
+  end
+end
 
+function browser:run()
+  local renderer = self:spawn_renderer()
+  event.pull("key_down",nil,nil,0x10)
+  renderer:suspend()
+  os.exit()
+end
 
-browser:network_get("athenas.com","index")
-browser:spawn_renderer()
+local args, ops = shell.parse(...)
 
-os.sleep(60)
+if args[1] == "setdns" then
+  local kitten_f = io.open("/home/.kitten.conf","w")
+  local kitten_conf = {dns=args[2]}
+  kitten_f:write(s.serialize(kitten_conf))
+  kitten_f:close()
+elseif args[1] == "file"
+  browser:init(nil)
+  browser:file_get(args[2])
+  browser:run()
+else
+  browser:init(ops["dns"])
+  browser:network_get(args[1],args[2])
+  browser:run()
+end
