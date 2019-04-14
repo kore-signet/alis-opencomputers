@@ -61,7 +61,7 @@ end
 
 function browser:init(dns)
   if dns == nil then
-    local kitten_f = io.open("/home/.kitten.conf","r")
+    local kitten_f = io.open("/etc/kitten.conf","r")
     local kitten_conf = s.unserialize(kitten_f:read("*all"))
     kitten_f:close()
     self.dns = kitten_conf["dns"]
@@ -80,11 +80,11 @@ end
 local args, ops = shell.parse(...)
 
 if args[1] == "setdns" then
-  local kitten_f = io.open("/home/.kitten.conf","w")
+  local kitten_f = io.open("/etc/kitten.conf","w")
   local kitten_conf = {dns=args[2]}
   kitten_f:write(s.serialize(kitten_conf))
   kitten_f:close()
-elseif args[1] == "file"
+elseif args[1] == "file" then
   browser:init(nil)
   browser:file_get(args[2])
   browser:run()
