@@ -16,11 +16,10 @@ function renderer:render_tag(tag)
     gpu.setBackground(0x000000)
   end
 
-  term.write(tag:value())
+  term.write(tag:value() .. "\n")
 end
 
 function renderer:render(tag)
-  print(tag)
   if tag:name() == "script" then return nil end
 
   if tag:children()[1] ~= nil then
@@ -33,7 +32,6 @@ function renderer:render(tag)
 end
 
 function renderer:main_loop(browser)
-  for k in pairs(browser.dom) do print(k) end
   while true do
     for _, v in ipairs(browser.scripts) do
       v:run(browser)

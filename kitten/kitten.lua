@@ -17,7 +17,7 @@ function browser:parse_dom(page)
   for _, v in ipairs(self.dom:children()) do
     if v:name() == "script" then
       print(v:value())
-      local f = io.open(counter  .. ".lua","w")
+      local f = io.open("/lib/." .. counter  .. ".lua","w")
       f:write(v:value())
       f:close()
       local loaded_script = require(tostring(counter))
@@ -61,6 +61,12 @@ function browser:file_get(file)
 end
 
 function browser:init(dns)
+  self.m = component.modem
+  if self.m ~= nil then
+    self.m.open(80)
+    self.m.open(53)
+  end
+
   if dns == nil then
     local kitten_f = io.open("/etc/kitten.conf","r")
     local kitten_conf = s.unserialize(kitten_f:read("*all"))
