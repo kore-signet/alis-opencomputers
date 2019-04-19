@@ -8,19 +8,22 @@ local s = require("serialization")
 
 local browser = {}
 
-function browser:parse_dom(page)
+function browser:parse_dom(page,page_name)
   self.dom = xml.newParser()
   self.dom = self.dom:ParseXmlText(page)
 
   self.scripts = {}
+  self.script_env = {}
+  self.script_env["browser"] = self
   local counter = 0
   for _, v in ipairs(self.dom:children()) do
     if v:name() == "script" then
       print(v:value())
-      local f = io.open("/lib/." .. counter  .. ".lua","w")
+      local path = "/tmp/kitten/" .. page_name .. ":" .. counter  .. ".lua"
+      local f = io.open(path,"w")
       f:write(v:value())
       f:close()
-      local loaded_script = require(tostring(counter))
+      local loaded_script = loadfile(path,self.script_env)()
       table.insert(self.scripts,loaded_script)
       counter = counter + 1
     end
@@ -32,7 +35,7 @@ function browser:spawn_renderer()
 end
 
 function browser:dns_get(addr)
-  m.send(self.dns,53,addr)
+  self.m.send(self.dns,53,addr)
 
   local _, _, _, _, _, r = event.pull("modem_message",nil,self.dns,53)
   return r
