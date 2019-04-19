@@ -3,7 +3,7 @@
 <script>
   local script = {}
   local computer = require("computer")
-  
+
   function script:run(browser)
     browser.dom:children()[2]:setValue("Current uptime of this computer: " .. computer.uptime())
   end
