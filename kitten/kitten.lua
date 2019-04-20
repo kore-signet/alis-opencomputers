@@ -5,6 +5,12 @@ local component = require("component")
 local event = require("event")
 local shell = require("shell")
 local s = require("serialization")
+local computer = require("computer")
+
+function tick_func()
+  computer.pushSignal("kitten_script_tick")
+  computer.pushSignal("kitten_render_tick")
+end
 
 local browser = {}
 
@@ -16,22 +22,24 @@ function browser:parse_dom(page,page_name)
   self.script_env = {}
   self.script_env["browser"] = self
   local counter = 0
-  for _, v in ipairs(self.dom:children()) do
-    if v:name() == "script" then
-      print(v:value())
-      local path = "/tmp/kitten/" .. page_name .. ":" .. counter  .. ".lua"
-      local f = io.open(path,"w")
-      f:write(v:value())
-      f:close()
-      local loaded_script = loadfile(path,self.script_env)()
-      table.insert(self.scripts,loaded_script)
-      counter = counter + 1
-    end
-  end
+  for i, node in ipairs(self.dom:children()) do
+   if node:name() == "script" then
+     local ok, result = pcall(load, node:value(), "=script["..tostring(i).."]", "t", self.script.env)
+     if ok then
+       table.insert(self.scripts, result)
+     else
+       print("script "..tostring(i)..":", "error loading script")
+     end
+   end
+ end
 end
 
-function browser:spawn_renderer()
-  return thread.create(renderer.main_loop(renderer,self))
+function browser:script_thread()
+  for _, script in ipairs(self.scripts) do
+    script(self)
+  end
+
+  event.pull("kitten_script_tick")
 end
 
 function browser:dns_get(addr)
@@ -54,12 +62,12 @@ function browser:network_get(addr,file)
     end
     complete = last
   end
-  self:parse_dom(page)
+  self:parse_dom(page,file)
 end
 
 function browser:file_get(file)
   local f = io.open(file,"r")
-  self:parse_dom(f:read("*all"))
+  self:parse_dom(f:read("*all"),file)
   f:close()
 end
 
@@ -81,9 +89,13 @@ function browser:init(dns)
 end
 
 function browser:run()
-  local renderer = self:spawn_renderer()
+  local renderer = thread.create(renderer.main_loop,renderer,self)
+  local script_thread = thread.create(self.script_thread,self)
+  local ticker = event.timer(1,tick_func,math.huge)
   event.pull("key_down",nil,nil,0x10)
+  event.cancel(ticker)
   renderer:suspend()
+  script_thread:suspend()
   os.exit()
 end
 

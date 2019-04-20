@@ -33,10 +33,6 @@ end
 
 function renderer:main_loop(browser)
   while true do
-    for _, v in ipairs(browser.scripts) do
-      v:run(browser)
-    end
-
     gpu.setBackground(0x000000)
     term.clear()
 
@@ -44,7 +40,7 @@ function renderer:main_loop(browser)
       self:render(v)
     end
 
-    os.sleep(2)
+    event.pull("kitten_render_tick")
   end
 end
 
