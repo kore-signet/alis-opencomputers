@@ -1,4 +1,5 @@
 # Alis' OpenComputers stuff
+## all of this is terribly incomplete and needs work!
 - Kitten, a "web" browser 
 - Nest, a "web" server
 - Pathfinder, a "dns" server
